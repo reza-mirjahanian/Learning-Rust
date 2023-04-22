@@ -30,3 +30,41 @@ Each value in Rust has a variable that is its owner.
 There can only be one owner at a time.
 When the owner goes out of scope, the value will be dropped.
 In addition to the ownership rules, Rust also employs a borrowing system that allows you to temporarily lend ownership of a value to another part of your code without transferring ownership permanently. This can be useful for passing values to functions or for implementing data structures that need to share ownership of a value between multiple parts of the code.
+
+
+The restriction preventing multiple mutable references to the same data at the same time allows for mutation but in a very controlled fashion. It’s something that new Rustaceans struggle with because most languages let you mutate whenever you’d like. The benefit of having this restriction is that Rust can prevent data races at compile time. A _data race_ is similar to a race condition and happens when these three behaviors occur:
+
+*   Two or more pointers access the same data at the same time.
+*   At least one of the pointers is being used to write to the data.
+*   There’s no mechanism being used to synchronize access to the data.
+
+Note that a reference’s scope starts from where it is introduced and continues through the last time that reference is used. For instance, this code will compile because the last usage of the immutable references, the `println!`, occurs before the mutable reference is introduced:
+
+```plaintext
+    let mut s = String::from("hello");
+
+    let r1 = &s; // no problem
+    let r2 = &s; // no problem
+    println!("{} and {}", r1, r2);
+    // variables r1 and r2 will not be used after this point
+
+    let r3 = &mut s; // no problem
+    println!("{}", r3);
+   
+```
+
+\--
+
+Because `s` is created inside `dangle`, when the code of `dangle` is finished, `s` will be deallocated. But we tried to return a reference to it. That means this reference would be pointing to an invalid `String`. That’s no good! Rust won’t let us do this.
+
+The solution here is to return the `String` directly:
+
+```plaintext
+fn no_dangle() -> String {
+    let s = String::from("hello");
+
+    s
+}
+```
+
+This works without any problems. Ownership is moved out, and nothing is deallocated.
