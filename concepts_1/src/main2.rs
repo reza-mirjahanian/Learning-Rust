@@ -62,4 +62,16 @@ fn main() {
         count += 1;
     }
     println!("End count = {count}");
+
+    {// s is not valid here, it’s not yet declared
+        let s = "hello";   // s is valid from this point forward
+
+        // do stuff with s
+    }
+
+
+    // what’s the difference here? Why can String be mutated but literals cannot? The difference is in how these two types deal with memory.
+    let s = String::from("hello");
+
+
 }
