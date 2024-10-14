@@ -49,3 +49,17 @@ There's a lot of visual noise in this error message. The  `FromResidual`  and  `
 My main gripe with this error message is that it doesn't explain *why* the `?` operator doesn't work with `Option` in that case... just that it doesn't.
 
 ---------
+
+Solution 1 (Not OK!):
+```
+fn get_user_name() -> Result<String, String> {
+    let user = get_user().unwrap();
+    // Do something with `user`
+    Ok(user)
+}
+```
+`unwrap` is fine in many cases, but it shouldn't be the first intuition for dealing with unexpected situations. Especially when you're writing a library or a function that is part of a larger codebase, you should strive to handle such situations gracefully. And in production code, it sets a bad example: one `unwrap` attracts another and the codebase becomes more fragile as you continue down this path
+
+
+---------
+
