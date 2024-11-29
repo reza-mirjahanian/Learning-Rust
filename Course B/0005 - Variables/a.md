@@ -103,6 +103,16 @@ let (a, b, c) = (1, 2, 3);  // Tuple destructuring
 let [head, tail @ ..] = [1, 2, 3, 4]; // Array pattern matching
 ```
 
+```
+fn main() {
+    let array = [1, 2, 3, 4];
+    let [head, tail @ ..] = array;
+
+    println!("Head: {}", head); // Outputs: Head: 1
+    println!("Tail: {:?}", tail); // Outputs: Tail: [2, 3, 4]
+}
+
+```
 ## Type Aliases
 ```rust
 type Kilometers = i32;
