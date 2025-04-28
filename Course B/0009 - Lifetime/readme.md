@@ -1,4 +1,6 @@
----
+
+https://doc.rust-lang.org/reference/lifetime-elision.html
+
 
 # Lifetime Annotations in Rust
 
