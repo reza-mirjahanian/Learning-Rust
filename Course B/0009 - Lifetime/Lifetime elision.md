@@ -73,3 +73,99 @@ fn frob(s: &str, t: &str) -> &str;                    // ILLEGAL
 ### Default trait object lifetimes
 
 The assumed lifetime of references held by a [trait object](https://doc.rust-lang.org/reference/types/trait-object.html) is called its *default object lifetime bound*. These were defined in [RFC 599](https://github.com/rust-lang/rfcs/blob/master/text/0599-default-object-bound.md) and amended in [RFC 1156](https://github.com/rust-lang/rfcs/blob/master/text/1156-adjust-default-object-bounds.md).
+
+These default object lifetime bounds are used instead of the lifetime parameter elision rules defined above when the lifetime bound is omitted entirely
+
+If `'_` is used as the lifetime bound then the bound follows the usual elision rules.
+
+##### If the trait object is used as a type argument of a generic type then the containing type is first used to try to infer a bound.
+-   If there is a unique bound from the containing type then that is the default
+
+-   If there is more than one bound from the containing type then an explicit bound must be specified
+
+##### If neither of those rules apply, then the bounds on the trait are used:
+
+-   If the trait is defined with a single lifetime *bound* then that bound is used.
+
+-   If `'static` is used for any lifetime bound then `'static` is used.
+
+
+-   If the trait has no lifetime bounds, then the lifetime is inferred in expressions and is `'static` outside of expressions.
+
+
+```rust
+// For the following trait...
+trait Foo { }
+
+// These two are the same because Box<T> has no lifetime bound on T
+type T1 = Box<dyn Foo>;
+type T2 = Box<dyn Foo + 'static>;
+
+// ...and so are these:
+impl dyn Foo {}
+impl dyn Foo + 'static {}
+
+// ...so are these, because &'a T requires T: 'a
+type T3<'a> = &'a dyn Foo;
+type T4<'a> = &'a (dyn Foo + 'a);
+
+// std::cell::Ref<'a, T> also requires T: 'a, so these are the same
+type T5<'a> = std::cell::Ref<'a, dyn Foo>;
+type T6<'a> = std::cell::Ref<'a, dyn Foo + 'a>;
+// This is an example of an error.
+struct TwoBounds<'a, 'b, T: ?Sized + 'a + 'b> {
+    f1: &'a i32,
+    f2: &'b i32,
+    f3: T,
+}
+type T7<'a, 'b> = TwoBounds<'a, 'b, dyn Foo>;
+//                                  ^^^^^^^
+// Error: the lifetime bound for this object type cannot be deduced from context
+```
+Note that the innermost object sets the bound, so &'a Box<dyn Foo> is still &'a Box<dyn Foo + 'static>.
+
+```rust
+// For the following trait...
+trait Bar<'a>: 'a { }
+
+// ...these two are the same:
+type T1<'a> = Box<dyn Bar<'a>>;
+type T2<'a> = Box<dyn Bar<'a> + 'a>;
+
+// ...and so are these:
+impl<'a> dyn Bar<'a> {}
+impl<'a> dyn Bar<'a> + 'a {}
+
+```
+
+### const and static elision
+Both [constant](https://doc.rust-lang.org/reference/items/constant-items.html) and [static](https://doc.rust-lang.org/reference/items/static-items.html) declarations of reference types have *implicit* `'static` lifetimes unless an explicit lifetime is specified. As such, the constant declarations involving `'static` above may be written without the lifetimes.
+```rust
+// STRING: &'static str
+const STRING: &str = "bitstring";
+
+struct BitsNStrings<'a> {
+    mybits: [u32; 2],
+    mystring: &'a str,
+}
+
+// BITS_N_STRINGS: BitsNStrings<'static>
+const BITS_N_STRINGS: BitsNStrings<'_> = BitsNStrings {
+    mybits: [1, 2],
+    mystring: STRING,
+};
+
+```
+
+Note that if the `static` or `const` items include function or closure references, which themselves include references, the compiler will first try the standard elision rules. If it is unable to resolve the lifetimes by its usual rules, then it will error. By way of example:
+
+```rust
+// There is insufficient information to bound the return reference lifetime
+// relative to the argument lifetimes, so this is an error.
+const RESOLVED_STATIC: &dyn Fn(&Foo, &Bar) -> &Baz = &somefunc;
+//                                            ^
+// this function's return type contains a borrowed value, but the signature
+// does not say whether it is borrowed from argument 1 or argument 2
+
+```
+
