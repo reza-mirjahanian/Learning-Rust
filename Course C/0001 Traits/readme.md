@@ -69,3 +69,140 @@ trait Seq<T> {
 ``` 
 
 ------------------------------
+
+[Dyn compatibility](https://doc.rust-lang.org/reference/items/traits.html#dyn-compatibility)
+--------------------------------------------------------------------------------------------
+
+-   All [supertraits](https://doc.rust-lang.org/reference/items/traits.html#supertraits) must also be dyn compatible.
+
+
+-   `Sized` must not be a [supertrait](https://doc.rust-lang.org/reference/items/traits.html#supertraits). In other words, it must not require `Self: Sized`.
+
+
+-   It must not have any associated constants.
+
+
+-   It must not have any associated types with generics.
+
+
+-   All associated functions must either be dispatchable from a trait object or be explicitly non-dispatchable:
+    -   Dispatchable functions must:
+        -   Not have any type parameters (although lifetime parameters are allowed).
+        -   Be a [method](https://doc.rust-lang.org/reference/items/associated-items.html#methods) that does not use `Self` except in the type of the receiver.
+        -   Have a receiver with one of the following types:
+            -   `&Self` (i.e. `&self`)
+            -   `&mut Self` (i.e `&mut self`)
+            -   [`Box<Self>`](https://doc.rust-lang.org/reference/special-types-and-traits.html#boxt)
+            -   [`Rc<Self>`](https://doc.rust-lang.org/reference/special-types-and-traits.html#rct)
+            -   [`Arc<Self>`](https://doc.rust-lang.org/reference/special-types-and-traits.html#arct)
+            -   [`Pin<P>`](https://doc.rust-lang.org/reference/special-types-and-traits.html#pinp) where `P` is one of the types above
+        -   Not have an opaque return type; that is,
+            -   Not be an `async fn` (which has a hidden `Future` type).
+            -   Not have a return position `impl Trait` type (`fn example(&self) -> impl Trait`).
+        -   Not have a `where Self: Sized` bound (receiver type of `Self` (i.e. `self`) implies this).
+    -   Explicitly non-dispatchable functions require:
+        -   Have a `where Self: Sized` bound (receiver type of `Self` (i.e. `self`) implies this).
+
+[\[items.traits.dyn-compatible.async-traits\]](https://doc.rust-lang.org/reference/items/traits.html#r-items.traits.dyn-compatible.async-traits "items.traits.dyn-compatible.async-traits")
+
+-   The [`AsyncFn`](https://doc.rust-lang.org/core/ops/async_function/trait.AsyncFn.html), [`AsyncFnMut`](https://doc.rust-lang.org/core/ops/async_function/trait.AsyncFnMut.html), and [`AsyncFnOnce`](https://doc.rust-lang.org/core/ops/async_function/trait.AsyncFnOnce.html) traits are not dyn-compatible.
+
+
+**Note**: This concept was formerly known as *object safety*.
+
+```rust
+
+// Examples of dyn compatible methods.
+trait TraitMethods {
+    fn by_ref(self: &Self) {}
+    fn by_ref_mut(self: &mut Self) {}
+    fn by_box(self: Box<Self>) {}
+    fn by_rc(self: Rc<Self>) {}
+    fn by_arc(self: Arc<Self>) {}
+    fn by_pin(self: Pin<&Self>) {}
+    fn with_lifetime<'a>(self: &'a Self) {}
+    fn nested_pin(self: Pin<Arc<Self>>) {}
+}
+
+``` 
+
+```rust
+// This trait is dyn compatible, but these methods cannot be dispatched on a trait object.
+trait NonDispatchable {
+    // Non-methods cannot be dispatched.
+    fn foo() where Self: Sized {}
+    // Self type isn't known until runtime.
+    fn returns(&self) -> Self where Self: Sized;
+    // `other` may be a different concrete type of the receiver.
+    fn param(&self, other: Self) where Self: Sized {}
+    // Generics are not compatible with vtables.
+    fn typed<T>(&self, x: T) where Self: Sized {}
+}
+
+struct S;
+impl NonDispatchable for S {
+    fn returns(&self) -> Self where Self: Sized { S }
+}
+let obj: Box<dyn NonDispatchable> = Box::new(S);
+obj.returns(); // ERROR: cannot call with Self return
+obj.param(S);  // ERROR: cannot call with Self parameter
+obj.typed(1);  // ERROR: cannot call with generic type
+
+
+``` 
+
+
+```rust
+// Examples of dyn-incompatible traits.
+trait DynIncompatible {
+    const CONST: i32 = 1;  // ERROR: cannot have associated const
+
+    fn foo() {}  // ERROR: associated function without Sized
+    fn returns(&self) -> Self; // ERROR: Self in return type
+    fn typed<T>(&self, x: T) {} // ERROR: has generic type parameters
+    fn nested(self: Rc<Box<Self>>) {} // ERROR: nested receiver not yet supported
+}
+
+struct S;
+impl DynIncompatible for S {
+    fn returns(&self) -> Self { S }
+}
+let obj: Box<dyn DynIncompatible> = Box::new(S); // ERROR
+
+
+``` 
+
+```rust
+// Examples of dyn-incompatible traits.
+trait DynIncompatible {
+    const CONST: i32 = 1;  // ERROR: cannot have associated const
+
+    fn foo() {}  // ERROR: associated function without Sized
+    fn returns(&self) -> Self; // ERROR: Self in return type
+    fn typed<T>(&self, x: T) {} // ERROR: has generic type parameters
+    fn nested(self: Rc<Box<Self>>) {} // ERROR: nested receiver not yet supported
+}
+
+struct S;
+impl DynIncompatible for S {
+    fn returns(&self) -> Self { S }
+}
+let obj: Box<dyn DynIncompatible> = Box::new(S); // ERROR
+
+// `Self: Sized` traits are dyn-incompatible.
+trait TraitWithSize where Self: Sized {}
+
+struct S;
+impl TraitWithSize for S {}
+let obj: Box<dyn TraitWithSize> = Box::new(S); // ERROR
+
+// Dyn-incompatible if `Self` is a type argument.
+trait Super<A> {}
+trait WithSelf: Super<Self> where Self: Sized {}
+
+struct S;
+impl<A> Super<A> for S {}
+impl WithSelf for S {}
+let obj: Box<dyn WithSelf> = Box::new(S); // ERROR: cannot use `Self` type parameter
+
+``` 
