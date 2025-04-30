@@ -44,3 +44,28 @@ Trait functions are not allowed to be [`const`](https://doc.rust-lang.org/refer
 
 ------------------------------
 
+[Trait bounds](https://doc.rust-lang.org/reference/items/traits.html#trait-bounds)
+----------------------------------------------------------------------------------
+
+Generic items may use traits as [bounds](https://doc.rust-lang.org/reference/trait-bounds.html) on their type parameters.
+
+
+
+[Generic traits](https://doc.rust-lang.org/reference/items/traits.html#generic-traits)
+--------------------------------------------------------------------------------------
+
+Type parameters can be specified for a trait to make it generic. These appear after the trait name, using the same syntax used in [generic functions](https://doc.rust-lang.org/reference/items/functions.html#generic-functions).
+
+
+
+```rust
+trait Seq<T> {
+    fn len(&self) -> u32;
+    fn elt_at(&self, n: u32) -> T;
+    fn iter<F>(&self, f: F) where F: Fn(T);
+}
+
+
+``` 
+
+------------------------------
