@@ -21,3 +21,26 @@ Associated items are defined as members of the trait within their respective nam
 
 ------------------------------
 
+
+All traits define an implicit type parameter `Self` that refers to "the type that is implementing this interface". Traits may also contain additional type parameters. These type parameters, including `Self`, may be constrained by other traits and so forth [as usual](https://doc.rust-lang.org/reference/items/generics.html).
+
+Traits are implemented for specific types through separate [implementations](https://doc.rust-lang.org/reference/items/implementations.html).
+
+------------------------------
+Trait functions may omit the function body by replacing it with a semicolon. This indicates that the implementation must define the function. If the trait function defines a body, this definition acts as a default for any implementation which does not override it. Similarly, associated constants may omit the equals sign and expression to indicate implementations must define the constant value. **Associated types** must never define the type, the type may only be specified in an implementation
+
+```rust
+// Examples of associated trait items with and without definitions.
+trait Example {
+    const CONST_NO_DEFAULT: i32;
+    const CONST_WITH_DEFAULT: i32 = 99;
+    type TypeNoDefault;
+    fn method_without_default(&self);
+    fn method_with_default(&self) {}
+}
+``` 
+Trait functions are not allowed to be [`const`](https://doc.rust-lang.org/reference/items/functions.html#const-functions).
+
+
+------------------------------
+
