@@ -1,0 +1,3 @@
+https://doc.rust-lang.org/reference/items/use-declarations.html
+
+A *use declaration* creates one or more local name bindings synonymous with some other [path](https://doc.rust-lang.org/reference/paths.html). Usually a `use` declaration is used to shorten the path required to refer to a module item. These declarations may appear in [modules](https://doc.rust-lang.org/reference/items/modules.html) and [blocks](https://doc.rust-lang.org/reference/expressions/block-expr.html), usually at the top. A `use` declaration is also sometimes called an *import*, or, if it is public, a *re-export*.
