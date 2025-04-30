@@ -206,3 +206,69 @@ impl WithSelf for S {}
 let obj: Box<dyn WithSelf> = Box::new(S); // ERROR: cannot use `Self` type parameter
 
 ``` 
+
+------------------------------
+### Supertraits
+
+**Supertraits** are traits that are required to be implemented for a type to implement a specific trait. Furthermore, anywhere a [generic](https://doc.rust-lang.org/reference/items/generics.html) or [trait object](https://doc.rust-lang.org/reference/types/trait-object.html) is bounded by a trait, it has access to the associated items of its supertraits.
+
+
+Supertraits are declared by trait bounds on the `Self` type of a trait and transitively the supertraits of the traits declared in those trait bounds. It is an error for a trait to be its own supertrait.
+
+
+The trait with a supertrait is called a **subtrait** of its supertrait.
+
+The following is an example of declaring `Shape` to be a supertrait of `Circle`.
+```rust
+
+trait Shape { fn area(&self) -> f64; }
+trait Circle : Shape { fn radius(&self) -> f64; }
+``` 
+And the following is the same example, except using where clauses.
+
+```rust
+trait Shape { fn area(&self) -> f64; }
+trait Circle where Self: Shape { fn radius(&self) -> f64; }
+
+``` 
+
+This next example gives `radius` a default implementation using the `area` function from `Shape`.
+```rust
+
+trait Circle where Self: Shape {
+    fn radius(&self) -> f64 {
+        // A = pi * r^2
+        // so algebraically,
+        // r = sqrt(A / pi)
+        (self.area() /std::f64::consts::PI).sqrt()
+    }
+}
+
+``` 
+This next example calls a supertrait method on a generic parameter.
+
+```rust
+
+fn print_area_and_radius<C: Circle>(c: C) {
+    // Here we call the area method from the supertrait `Shape` of `Circle`.
+    println!("Area: {}", c.area());
+    println!("Radius: {}", c.radius());
+}
+
+``` 
+Similarly, here is an example of calling supertrait methods on trait objects.
+
+```rust
+let circle = Box::new(circle) as Box<dyn Circle>;
+let nonsense = circle.radius() * circle.area();
+
+
+``` 
+
+[Unsafe traits](https://doc.rust-lang.org/reference/items/traits.html#unsafe-traits)
+------------------------------------------------------------------------------------
+
+
+Traits items that begin with the `unsafe` keyword indicate that *implementing* the trait may be [unsafe](https://doc.rust-lang.org/reference/unsafety.html). It is safe to use a correctly implemented unsafe trait. The [trait implementation](https://doc.rust-lang.org/reference/items/implementations.html#trait-implementations) must also begin with the `unsafe` keyword.
+
+[`Sync`](https://doc.rust-lang.org/reference/special-types-and-traits.html#sync) and [`Send`](https://doc.rust-lang.org/reference/special-types-and-traits.html#send) are examples of unsafe traits.
