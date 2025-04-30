@@ -272,3 +272,70 @@ let nonsense = circle.radius() * circle.area();
 Traits items that begin with the `unsafe` keyword indicate that *implementing* the trait may be [unsafe](https://doc.rust-lang.org/reference/unsafety.html). It is safe to use a correctly implemented unsafe trait. The [trait implementation](https://doc.rust-lang.org/reference/items/implementations.html#trait-implementations) must also begin with the `unsafe` keyword.
 
 [`Sync`](https://doc.rust-lang.org/reference/special-types-and-traits.html#sync) and [`Send`](https://doc.rust-lang.org/reference/special-types-and-traits.html#send) are examples of unsafe traits.
+
+
+[Parameter patterns](https://doc.rust-lang.org/reference/items/traits.html#parameter-patterns)
+----------------------------------------------------------------------------------------------
+
+Function or method declarations without a body only allow [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html) or `_` [wild card](https://doc.rust-lang.org/reference/patterns.html#wildcard-pattern) patterns. `mut` [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html) is currently allowed, but it is deprecated and will become a hard error in the future.
+
+
+In the 2015 edition, the pattern for a trait function or method parameter is optional:
+```rust
+// 2015 Edition
+trait T {
+    fn f(i32);  // Parameter identifiers are not required.
+}
+
+``` 
+The kinds of patterns for parameters is limited to one of the following:
+
+-   [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html)
+-   `mut` [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html)
+-   [`_`](https://doc.rust-lang.org/reference/patterns.html#wildcard-pattern)
+-   `&` [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html)
+-   `&&` [IDENTIFIER](https://doc.rust-lang.org/reference/identifiers.html)
+
+Beginning in the 2018 edition, function or method parameter patterns are no longer optional. Also, all irrefutable patterns are allowed as long as there is a body. Without a body, the limitations listed above are still in effect.
+
+```rust
+trait T {
+    fn f1((a, b): (i32, i32)) {}
+    fn f2(_: (i32, i32));  // Cannot use tuple pattern without a body.
+}
+
+``` 
+
+[Item visibility](https://doc.rust-lang.org/reference/items/traits.html#item-visibility)
+----------------------------------------------------------------------------------------
+
+Trait items syntactically allow a [*Visibility*](https://doc.rust-lang.org/reference/visibility-and-privacy.html) annotation, but this is rejected when the trait is validated. This allows items to be parsed with a unified syntax across different contexts where they are used. As an example, an empty `vis` macro fragment specifier can be used for trait items, where the macro rule may be used in other situations where visibility is allowed.
+
+```rust
+macro_rules! create_method {
+    ($vis:vis $name:ident) => {
+        $vis fn $name(&self) {}
+    };
+}
+
+trait T1 {
+    // Empty `vis` is allowed.
+    create_method! { method_of_t1 }
+}
+
+struct S;
+
+impl S {
+    // Visibility is allowed here.
+    create_method! { pub method_of_s }
+}
+
+impl T1 for S {}
+
+fn main() {
+    let s = S;
+    s.method_of_t1();
+    s.method_of_s();
+}
+
+``` 
