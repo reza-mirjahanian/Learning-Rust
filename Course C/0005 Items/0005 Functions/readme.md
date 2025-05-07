@@ -56,3 +56,48 @@ Const functions may use the [`extern`](https://doc.rust-lang.org/reference/item
 
 
 Const functions are not allowed to be [async](https://doc.rust-lang.org/reference/items/functions.html#async-functions).
+
+
+### Async functions
+
+Functions may be qualified as async, and this can also be combined with the `unsafe` qualifier:
+
+```
+async fn regular_example() { }
+async unsafe fn unsafe_example() { }
+
+```
+
+
+Async functions do no work when called: instead, they capture their arguments into a future. When polled, that future will execute the function's body.
+
+
+An async function is roughly equivalent to a function that returns [`impl Future`](https://doc.rust-lang.org/reference/types/impl-trait.html) and with an [`async move` block](https://doc.rust-lang.org/reference/expressions/block-expr.html#async-blocks) as its body:
+
+```
+// Source
+async fn example(x: &str) -> usize {
+    x.len()
+}
+```
+
+is roughly equivalent to:
+
+```
+// Desugared
+fn example<'a>(x: &'a str) -> impl Future<Output = usize> + 'a {
+    async move { x.len() }
+}
+```
+
+The actual desugaring is more complex:
+
+
+
+-   The return type in the desugaring is assumed to capture all lifetime parameters from the `async fn` declaration. This can be seen in the desugared example above, which explicitly outlives, and hence captures, `'a`.
+
+
+
+-   The [`async move` block](https://doc.rust-lang.org/reference/expressions/block-expr.html#async-blocks) in the body captures all function parameters, including those that are unused or bound to a `_` pattern. This ensures that function parameters are dropped in the same order as they would be if the function were not async, except that the drop occurs when the returned future has been fully awaited.
+
+For more information on the effect of async, see [`async` blocks](https://doc.rust-lang.org/reference/expressions/block-expr.html#async-blocks).
