@@ -91,3 +91,8 @@ However, `size_of::<Type>()` is the preferred and more common way to query type 
 - The expression `mem::size_of::<u32>() == 4` checks if the size of `u32` is 4 bytes, which it is, so the result is `true`.
 - The syntax might look unusual at first, but it is a standard way in Rust to work with generic functions and type parameters.
 
+
+
+
+
+
