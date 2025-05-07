@@ -41,3 +41,18 @@ foo(&[1, 2]);
 
 
 will instantiate type parameter `T` with `i32`.
+
+
+### Const functions
+
+
+
+Functions qualified with the `const` keyword are [const functions](https://doc.rust-lang.org/reference/const_eval.html#const-functions), as are [tuple struct](https://doc.rust-lang.org/reference/items/structs.html) and [tuple variant](https://doc.rust-lang.org/reference/items/enumerations.html) constructors. *Const functions* can be called from within [const contexts](https://doc.rust-lang.org/reference/const_eval.html#const-context).
+
+
+
+Const functions may use the [`extern`](https://doc.rust-lang.org/reference/items/functions.html#extern-function-qualifier) function qualifier.
+
+
+
+Const functions are not allowed to be [async](https://doc.rust-lang.org/reference/items/functions.html#async-functions).
