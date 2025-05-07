@@ -22,3 +22,22 @@ A parameter with the `...` token indicates a [variadic function](https://doc.
 
 
 Functions without a body block are terminated with a semicolon. This form may only appear in a [trait](https://doc.rust-lang.org/reference/items/traits.html) or [external block](https://doc.rust-lang.org/reference/items/external-blocks.html).
+
+
+----
+
+When a generic function is referenced, its type is instantiated based on the context of the reference. For example, calling the `foo` function here:
+
+```
+use std::fmt::Debug;
+
+fn foo<T>(x: &[T]) where T: Debug {
+    // details elided
+}
+
+foo(&[1, 2]);
+
+```
+
+
+will instantiate type parameter `T` with `i32`.
