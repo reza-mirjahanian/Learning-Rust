@@ -41,3 +41,28 @@ fn outer() {
 }
 
 ```
+### [let statements](https://doc.rust-lang.org/reference/statements.html#let-statements)
+
+> **^Syntax^**
+> *LetStatement* :
+>    [*OuterAttribute*](https://doc.rust-lang.org/reference/attributes.html)^\*^ `let` [*PatternNoTopAlt*](https://doc.rust-lang.org/reference/patterns.html) ( `:` [*Type*](https://doc.rust-lang.org/reference/types.html) )^?^ (`=` [*Expression*](https://doc.rust-lang.org/reference/expressions.html) [†](https://doc.rust-lang.org/reference/statements.html#let-else-restriction) ( `else` [*BlockExpression*](https://doc.rust-lang.org/reference/expressions/block-expr.html)) ^?^ ) ^?^ `;`
+>
+> † When an `else` block is specified, the *Expression* must not be a [*LazyBooleanExpression*](https://doc.rust-lang.org/reference/expressions/operator-expr.html#lazy-boolean-operators), or end with a `}`.
+
+
+
+A *`let` statement* introduces a new set of [variables](https://doc.rust-lang.org/reference/variables.html), given by a [pattern](https://doc.rust-lang.org/reference/patterns.html). The pattern is followed optionally by a type annotation and then either ends, or is followed by an initializer expression plus an optional `else` block.
+
+
+If the pattern does not match (this requires it to be refutable), the `else` block is executed. The `else` block must always diverge (evaluate to the [never type](https://doc.rust-lang.org/reference/types/never.html)).
+
+```rust
+let (mut v, w) = (vec![1, 2, 3], 42); // The bindings may be mut or const
+let Some(t) = v.pop() else { // Refutable patterns require an else block
+    panic!(); // The else block must diverge
+};
+let [u, v] = [v[0], v[1]] else { // This pattern is irrefutable, so the compiler
+                                 // will lint as the else block is redundant.
+    panic!();
+};
+```
