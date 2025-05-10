@@ -66,3 +66,37 @@ let [u, v] = [v[0], v[1]] else { // This pattern is irrefutable, so the compiler
     panic!();
 };
 ```
+
+### Expression statements
+
+The type of [*ExpressionWithBlock*](https://doc.rust-lang.org/reference/expressions.html) expressions when used as statements must be the unit type.
+
+```rust
+v.pop();          // Ignore the element returned from pop
+if v.is_empty() {
+    v.push(5);
+} else {
+    v.remove(0);
+}                 // Semicolon can be omitted.
+[1];              // Separate expression statement, not an indexing expression.
+
+```
+
+When the trailing semicolon is omitted, the result must be type `()`.
+
+```rust
+
+// bad: the block's type is i32, not ()
+// Error: expected `()` because of default return type
+// if true {
+//   1
+// }
+
+// good: the block's type is i32
+if true {
+  1
+} else {
+  2
+};
+
+```
