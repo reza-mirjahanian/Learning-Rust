@@ -506,4 +506,3 @@ Visibility of associated items is determined by the visibility of the trait or `
 | **Key Difference**  | Associated types in traits provide a unique way to define type relationships as part of a trait's contract. | Static members are purely associated with the class definition itself.                  | Static members are purely associated with the class definition itself.                   | More dynamic; class attributes can be modified at runtime.                                 |
 | **Compilation**     | Primarily compile-time resolution for most associated items, dynamic dispatch for trait objects. | Mix of compile-time and runtime (virtual methods).                                       | Mix of compile-time and runtime (virtual methods, templates are compile-time).           | Largely runtime.                                                                           |
 
-
