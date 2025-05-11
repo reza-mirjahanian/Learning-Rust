@@ -112,14 +112,14 @@ fn main() {
 
 -   A trait object (dyn Draw) provides a way to treat different types that implement the Draw trait as a single type at runtime. The dyn keyword explicitly tells Rust to create a trait object, allowing the Vec to hold Box<Circle> and Box<Square> as Box<dyn Draw>.
 
-Without dyn, Rust would expect a concrete type or a generic with static dispatch, which wouldn't allow storing different types like Circle and Square in the same Vec.
+Without dyn, Rust would expect a **concrete type or a generic with static dispatch**, which wouldn't allow storing different types like Circle and Square in the same Vec.
 2\. Dynamic Dispatch
 
 -   The dyn keyword indicates that method calls (e.g., shape.draw()) will use dynamic dispatch. This means the specific draw method to call (for Circle or Square) is resolved at runtime based on the actual type of the object.
 
--   This is necessary because the compiler doesn't know at compile time which type (Circle or Square) is stored in each Box<dyn Draw>. The trait object stores a vtable (a table of function pointers) to resolve the correct draw method at runtime.
+-   This is necessary because the compiler doesn't know at compile time **which type** (Circle or Square) is stored in each Box<dyn Draw>. The trait object stores a vtable (a table of function pointers) to resolve the correct draw method at runtime.
 
-Without dyn, Rust would attempt static dispatch (resolving calls at compile time), which requires a single, known type or generics, but that wouldn't work for a collection of different types.
+Without dyn, Rust would attempt **static dispatch** (resolving calls at compile time), which requires a single, known type or generics, but that wouldn't work for a collection of different types.
 3\. Why Box<dyn Draw> Instead of Box<Draw>?
 
 -   In Rust, Draw by itself is a trait, not a type. You can't use Box<Draw> directly because traits are not sized (they don't have a fixed memory size, as different types implementing the trait can have different sizes).
