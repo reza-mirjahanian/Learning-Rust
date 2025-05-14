@@ -18,3 +18,32 @@ The advantages of checking the borrowing rules at **compile time** are that erro
 The advantage of checking the borrowing rules at runtime instead is that certain memory-safe scenarios are then allowed, where they would've been disallowed by the compile-time checks. Static analysis, like the Rust compiler, is inherently conservative. Some properties of code are impossible to detect by analyzing the code: the most famous example is the Halting Problem, which is beyond the scope of this book but is an interesting topic to research.
 
 Because some analysis is impossible, if the Rust compiler can't be sure the code complies with the ownership rules, it might reject a correct program; in this way, it's conservative. If Rust accepted an incorrect program, users wouldn't be able to trust in the guarantees Rust makes. However, if Rust rejects a correct program, the programmer will be inconvenienced, but nothing catastrophic can occur. The `RefCell<T>` type is useful when you're sure your **code follows the borrowing rules but the compiler is unable to understand and guarantee that.**
+
+
+Similar to Rc<T>, RefCell<T> is only for use in **single-threaded** scenarios and will give you a compile-time error if you try using it in a multithreaded context. We’ll talk about how to get the functionality of RefCell<T> in a multithreaded
+
+--------------------
+
+Here is a recap of the reasons to choose `Box<T>`, `Rc<T>`, or `RefCell<T>`:
+
+-   `Rc<T>` enables multiple owners of the same data; `Box<T>` and `RefCell<T>` have single owners.
+-   `Box<T>` allows immutable or mutable borrows checked at compile time; `Rc<T>` allows only immutable borrows checked at compile time; `RefCell<T>` allows immutable or mutable borrows checked at runtime.
+-   Because `RefCell<T>` allows mutable borrows checked at runtime, you can mutate the value inside the `RefCell<T>` even when the `RefCell<T>` is immutable.
+
+Mutating the value inside an immutable value is the **interior mutability** pattern.
+
+---
+### Interior Mutability: A Mutable Borrow to an Immutable Value
+
+A consequence of the borrowing rules is that when you have an immutable value, you can't borrow it mutably. For example, this code won't compile:
+
+```
+
+[![](https://doc.rust-lang.org/book/img/ferris/does_not_compile.svg "This code does not compile!")](https://doc.rust-lang.org/book/ch00-00-introduction.html#ferris)
+`fn main() {
+    let x = 5;
+    let y = &mut x;
+}`
+```
+
+If you tried to compile this code, you'd get the  error
