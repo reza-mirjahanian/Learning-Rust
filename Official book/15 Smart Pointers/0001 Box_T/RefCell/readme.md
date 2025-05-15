@@ -39,7 +39,7 @@ A consequence of the borrowing rules is that when you have an immutable value, y
 
 ```
 
-[![](https://doc.rust-lang.org/book/img/ferris/does_not_compile.svg "This code does not compile!")](https://doc.rust-lang.org/book/ch00-00-introduction.html#ferris)
+
 `fn main() {
     let x = 5;
     let y = &mut x;
@@ -47,3 +47,17 @@ A consequence of the borrowing rules is that when you have an immutable value, y
 ```
 
 If you tried to compile this code, you'd get the  error
+
+
+----
+
+#### [A Use Case for Interior Mutability: Mock Objects](https://doc.rust-lang.org/book/ch15-05-interior-mutability.html#a-use-case-for-interior-mutability-mock-objects)
+
+Sometimes during testing a programmer will use a type in place of another type, in order to observe particular behavior and assert it's implemented correctly. This placeholder type is called a *test double*. Think of it in the sense of a "stunt double" in filmmaking, where a person steps in and substitutes for an actor to do a particular tricky scene. Test doubles stand in for other types when we're running tests. *Mock objects* are specific types of test doubles that record what happens during a test so you can assert that the correct actions took place.
+
+
+#### [Keeping Track of Borrows at Runtime with `RefCell<T>`](https://doc.rust-lang.org/book/ch15-05-interior-mutability.html#keeping-track-of-borrows-at-runtime-with-refcellt)
+
+When creating immutable and mutable references, we use the `&` and `&mut` syntax, respectively. With `RefCell<T>`, we use the `borrow` and `borrow_mut` methods, which are part of the safe API that belongs to `RefCell<T>`. The `borrow` method returns the smart pointer type `Ref<T>`, and `borrow_mut` returns the smart pointer type `RefMut<T>`. Both types implement `Deref`, so we can treat them like regular references.
+
+The `RefCell<T>` keeps track of how many `Ref<T>` and `RefMut<T>` smart pointers are currently active. Every time we call `borrow`, the `RefCell<T>` increases its count of how many immutable borrows are active. When a `Ref<T>` value goes out of scope, the count of immutable borrows goes down by one. Just like the compile-time borrowing rules, `RefCell<T>` lets us have many immutable borrows or one mutable borrow at any point in time.
