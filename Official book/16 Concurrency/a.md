@@ -197,9 +197,5 @@ impl Future for MyFuture {
 
 ---
 
-# 🏆 Summary
 
-Rust’s concurrency is **built to empower developers to confidently scale programs** without the traditional dangers of memory corruption or race conditions. **Its design enforces safety, promotes clarity, and rewards deep understanding**. Mastery means not just using threads or async, but *deeply understanding ownership, Send/Sync, and memory models* at a mechanical level.
-
----
 
