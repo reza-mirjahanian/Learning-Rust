@@ -30,19 +30,22 @@ pub trait Delimiter {
     fn find_next(&self, s: &str) -> Option<(usize, usize)>;
 }
 
+
+
+// '?' called the try operator or the question mark operator. It is a postfix operator that unwraps Result<T, E> and Option<T> values.
 impl<'haystack, D> Iterator for StrSplit<'haystack, D>
 where
     D: Delimiter,
 {
     type Item = &'haystack str;
     fn next(&mut self) -> Option<Self::Item> {
-        let remainder = self.remainder.as_mut()?;
+        let remainder = self.remainder.as_mut()?;  // converts an &mut Option<T> into an Option<&mut T>. In other words, instead of consuming or moving the Option out, you get a mutable reference to its interior value 
         if let Some((delim_start, delim_end)) = self.delimiter.find_next(remainder) {
             let until_delimiter = &remainder[..delim_start];
             *remainder = &remainder[delim_end..];
             Some(until_delimiter)
         } else {
-            self.remainder.take()
+            self.remainder.take()  // self.remainder is set to None |  consuming the last piece of data in an iterator and preparing it for termination
         }
     }
 }
@@ -77,7 +80,7 @@ fn until_char_test() {
 #[test]
 fn it_works() {
     let haystack = "a b c d e";
-    let letters: Vec<_> = StrSplit::new(haystack, " ").collect();
+    let letters: Vec<_> = StrSplit::new(haystack, " ").collect(); // _ in a type is Rust’s way of saying “infer this type for me”
     assert_eq!(letters, vec!["a", "b", "c", "d", "e"]);
 }
 
