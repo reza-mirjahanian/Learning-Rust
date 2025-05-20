@@ -41,8 +41,8 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let remainder = self.remainder.as_mut()?;  // converts an &mut Option<T> into an Option<&mut T>. In other words, instead of consuming or moving the Option out, you get a mutable reference to its interior value 
         if let Some((delim_start, delim_end)) = self.delimiter.find_next(remainder) {
-            let until_delimiter = &remainder[..delim_start];
-            *remainder = &remainder[delim_end..];
+            let until_delimiter = &remainder[..delim_start]; // The until_delimiter variable is designed to hold the segment of the self.remainder string that comes before the next occurrence of the delimiter. This segment is precisely what the StrSplit iterator should yield as its current item.
+            *remainder = &remainder[delim_end..]; // // ← mutating the field in-place
             Some(until_delimiter)
         } else {
             self.remainder.take()  // self.remainder is set to None |  consuming the last piece of data in an iterator and preparing it for termination
