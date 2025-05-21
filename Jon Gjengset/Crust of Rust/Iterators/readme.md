@@ -17,3 +17,34 @@ let r2 = iter.next().unwrap();  // 0..2
 ``` 
 
 
+```rust
+std::iter::once(value)
+// Yields the value once, then ends.
+//  Inject a single item into a larger iterator chain
+let v = vec![1, 2, 3];
+
+let extended: Vec<_> = v.into_iter()
+    .chain(iter::once(4))
+    .collect();
+
+assert_eq!(extended, vec![1, 2, 3, 4]);
+//
+
+let mut it = iter::once(10);
+
+assert_eq!(it.next(), Some(10));
+assert_eq!(it.next(), None);  // Only once!
+``` 
+| Feature  | `std::iter::once(x)` | `vec![x]`             |
+| -------- | -------------------- | --------------------- |
+| Type     | Iterator             | Vector                |
+| Lazy?    | ✅ Yes                | ❌ No (eager)          |
+| Chaining | Easy with `.chain()` | Requires `vec.iter()` |
+
+
+
+| Syntax         | Meaning                                                    |
+| -------------- | ---------------------------------------------------------- |
+| `collect()`    | Turns an iterator into a collection                        |
+| `::<Vec<_>>()` | Type hint: collect into a `Vec<T>`, where `T` is inferred  |
+| `Vec<_>`       | Rust infers what each item in the vector is (e.g., `&str`) |
